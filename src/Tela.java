@@ -1,11 +1,13 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.Period;
 
 public class Tela {
     public JPanel paiel;
     public JTextField Nome;
-    public JComboBox CBestadoCivil;
+    public JComboBox<String> CBestadoCivil;
     public JCheckBox masculinoCheckBox;
     public JCheckBox femininoCheckBox;
     public JTextField dataNasc;
@@ -13,8 +15,7 @@ public class Tela {
     public JTextField cpf;
     public JButton cadastrarButton;
 
-    String cpfCalc;
-    public String mensagemDeErro = "";
+    String cpfCalc = "";
 
     public Tela(){
         cadastrarButton.addActionListener(new ActionListener() {
@@ -83,7 +84,81 @@ public class Tela {
                 if(profissao.getText().isEmpty()){
                     profissao.setText("Desepregado(a)");
                 }
+                mostrarDados();
             }
         });
+
+        CBestadoCivil.addItem("Solteiro(a)");
+        CBestadoCivil.addItem("Casado(a)");
+        CBestadoCivil.addItem("Divorciado(a)");
+        CBestadoCivil.addItem("Viúvo(a)");
+    }
+
+    public void mostrarDados(){
+        JOptionPane.showMessageDialog(null, "\t\t"+Nome.getText()+"\n"+
+                calcularIdade(dataNasc.getText())+
+                statusProfissao(profissao)+
+                sexo(masculinoCheckBox, femininoCheckBox)+
+                "CPF: "+cpfCalc+"\n"+
+                obterEstadoCivil(CBestadoCivil.getSelectedItem().toString()));
+    }
+
+    public String calcularIdade(String data){
+        //int idade = 0;
+
+        LocalDate d = LocalDate.now();
+        String dataAtual = d.toString().trim().replace("-", "");
+
+        int ano = Integer.parseInt(data.substring(4, 8));
+        int mes = Integer.parseInt(data.substring(2,4));
+        int dia = Integer.parseInt(data.substring(0,2));
+
+        int anoAtual = Integer.parseInt(dataAtual.substring(0, 4));
+        int mesAtual = Integer.parseInt(dataAtual.substring(4, 6));
+        int diaAtual = Integer.parseInt(dataAtual.substring(6, 8));
+
+        if (mesAtual == mes && diaAtual == dia){
+            return "Seu aniversario é hj feliz "+ (anoAtual-ano) +" anos\n";
+        }
+
+        LocalDate dataAtual2 = LocalDate.now();
+        // Cria a data de nascimento do usuário
+        LocalDate dataNascimento = LocalDate.of(ano, mes, dia);
+
+        // Calcula a idade da pessoa
+        int idade = Period.between(dataNascimento, dataAtual2).getYears();
+
+        // Cria a data do próximo aniversário
+        LocalDate proximoAniversario = dataNascimento.withYear(dataAtual2.getYear());
+
+        // Se o aniversário já passou neste ano, ajusta para o próximo ano
+        if (proximoAniversario.isBefore(dataAtual2) || proximoAniversario.isEqual(dataAtual2)) {
+            proximoAniversario = proximoAniversario.plusYears(1);
+        }
+
+        // Calcula a diferença em meses e dias até o próximo aniversário
+        Period periodo = Period.between(dataAtual2, proximoAniversario);
+        int mesesRestantes = periodo.getMonths();
+        int diasRestantes = periodo.getDays();
+
+        return "Você tem "+idade+" anos e faltam "+ mesesRestantes+ " meses e "+diasRestantes+" dias para o seu próximo aniversário.\n";
+    }
+
+    public String statusProfissao(JTextField profissao){
+        if(profissao.getText().equals("Engenheiro") || profissao.getText().equals("Analista de Sistemas")){
+            return "Profissão: "+ profissao.getText() +"e tem vagas disponíveis na área\n";
+        }
+        return "Profissão: "+ profissao.getText() +"\n";
+    }
+
+    public String sexo(JCheckBox masculino, JCheckBox feminino){
+        if(masculino.isSelected()){
+            return "Sexo: Masculino\n";
+        }
+        return "Sexo: Feminino\n";
+    }
+
+    public String obterEstadoCivil(String status){
+        return "Estado Civil: "+ status;
     }
 }
